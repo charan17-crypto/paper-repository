@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+{% block title %}{{ paper.title }} — The Reading Room{% endblock %}
+
+{% block content %}
+<section class="section" style="padding-top:44px; max-width:720px;">
+  <div style="margin-bottom:32px;">
+    <a href="{{ url_for('papers') }}" style="color:var(--text-secondary); font-size:0.9rem;">← Back to archive</a>
+  </div>
+
+  <article style="background:var(--card); border:0.5px solid var(--line); border-radius:var(--radius); padding:32px;">
+    <div class="eyebrow" style="margin-bottom:12px;">
+      {{ paper.uploaded_at.strftime('%d %b %Y') }}
+      {% if paper.status == 'approved' %}<span class="stamp stamp-approved" style="margin-left:12px;">Published</span>{% endif %}
+    </div>
+
+    <h1 style="margin-top:0;">{{ paper.title }}</h1>
+
+    <div style="display:flex; align-items:center; gap:16px; margin-bottom:28px; padding-bottom:28px; border-bottom:1px solid var(--line);">
+      <div style="flex:1;">
+        <div style="font-weight:600; color:var(--ink);">{{ paper.author_name }}</div>
+        <div style="font-size:0.85rem; color:var(--text-secondary);">{{ paper.author_email }}</div>
+      </div>
+      {% if is_owner or is_admin %}
+        <span style="background:var(--bg-accent); color:var(--text-accent); font-size:0.75rem; padding:6px 12px; border-radius:var(--radius); font-weight:600; text-transform:uppercase; letter-spacing:0.04em;">
+          {% if is_owner %}Your paper{% endif %}
+          {% if is_admin and not is_owner %}Admin{% endif %}
+        </span>
+      {% endif %}
+    </div>
+
+    {% if paper.description %}
+      <div style="margin-bottom:28px;">
+        <div style="font-size:0.85rem; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.04em; margin-bottom:8px;">Abstract</div>
+        <p style="margin:0; line-height:1.7;">{{ paper.description }}</p>
+      </div>
+    {% endif %}
+    <hr>
+
+<h3>🤖 AI Summary</h3>
+
+<div class="card p-3 mt-3">
+    {% if paper.summary %}
+        <pre style="white-space: pre-wrap;">{{ paper.summary }}</pre>
+    {% else %}
+        <p>No AI summary available.</p>
+    {% endif %}
+</div>
+<hr>
+
+<h3>💬 Ask AI</h3>
+
+<div class="card p-3">
+
+    <textarea
+        id="question"
+        class="form-control"
+        rows="3"
+        placeholder="Ask anything about this paper..."></textarea>
+
+    <br>
+
+    <button
+        class="btn btn-primary"
+        onclick="ask_question()">
+
+        Ask AI
+
+    </button>
+
+    <br><br>
+
+    <div
+        id="answer"
+        style="white-space:pre-wrap;">
+    </div>
+
+</div>
+    <div style="background:var(--paper-alt); border:1px dashed var(--line); border-radius:var(--radius); padding:20px; margin-bottom:28px; text-align:center; color:var(--text-secondary); font-size:0.9rem;">
+      <div style="margin-bottom:12px;">📄 {{ paper.filename }}</div>
+      <div style="font-size:0.8rem; color:var(--text-muted);">File stored securely. Download requires login.</div>
+    </div>
+
+    <div style="display:flex; gap:12px; flex-wrap:wrap;">
+      {% if is_logged_in %}
+        <a class="btn btn-primary" href="{{ url_for('download_paper', paper_id=paper.id) }}" download>
+          Download
+        </a>
+      {% else %}
+        <a class="btn btn-primary" href="{{ url_for('login', next=request.path) }}">
+          Log in to download
+        </a>
+        <a class="btn btn-ghost" href="{{ url_for('register') }}">Create account</a>
+      {% endif %}
+      {% if is_owner or is_admin %}
+        <a class="btn btn-ghost" href="{{ url_for('dashboard') if is_owner else url_for('admin_panel') }}">
+          Back to dashboard
+        </a>
+      {% endif %}
+    </div>
+
+    {% if is_admin and paper.status != 'approved' %}
+      <div style="margin-top:32px; padding-top:32px; border-top:1px solid var(--line);">
+        <p style="color:var(--text-secondary); font-size:0.9rem; margin-bottom:16px;">Admin controls:</p>
+        <form method="post" action="{{ url_for('approve_paper', paper_id=paper.id) }}" style="display:inline; margin-right:12px;">
+          <button class="btn btn-gold btn-small" type="submit">Approve for publication</button>
+        </form>
+        <form method="post" action="{{ url_for('reject_paper', paper_id=paper.id) }}" style="display:inline;">
+          <button class="btn btn-danger btn-small" type="submit">Reject submission</button>
+        </form>
+      </div>
+    {% endif %}
+  </article>
+</section>
+<script>
+function ask_question() {
+
+    const question = document.getElementById("question").value.trim();
+
+    if (question === "") {
+        alert("Please enter a question.");
+        return;
+    }
+
+    document.getElementById("answer").innerHTML = "🤖 Thinking...";
+
+    fetch("/chat/{{ paper.id }}", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: "question=" + encodeURIComponent(question)
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log(data.answer);
+        document.getElementById("answer").innerHTML = data.answer;
+    })
+    .catch(error => {
+        document.getElementById("answer").innerHTML =
+            "An error occurred while contacting the AI.";
+        console.error(error);
+    });
+}
+</script>
+{% endblock %}

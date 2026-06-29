@@ -1,0 +1,7 @@
+PyMySQL
+groq
+python-dotenv
+pypdf
+flask
+python-docx
+uvicorn

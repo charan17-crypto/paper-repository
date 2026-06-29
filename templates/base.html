@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}The Reading Room{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="shell bar">
+      <a class="brand" href="{{ url_for('landing') }}">
+        <span class="mark">RR</span> The Reading Room
+      </a>
+      <nav class="main-nav">
+        <a href="{{ url_for('landing') }}" class="{{ 'active' if request.endpoint == 'landing' }}">Home</a>
+        <a href="{{ url_for('papers') }}" class="{{ 'active' if request.endpoint == 'papers' }}">Archive</a>
+
+        {% if session.get('user_id') %}
+          {% if session.get('role') == 'admin' %}
+            <a href="{{ url_for('admin_panel') }}" class="{{ 'active' if request.endpoint == 'admin_panel' }}">Approvals</a>
+          {% else %}
+            <a href="{{ url_for('dashboard') }}" class="{{ 'active' if request.endpoint == 'dashboard' }}">Dashboard</a>
+            <a href="{{ url_for('upload') }}" class="{{ 'active' if request.endpoint == 'upload' }}">Upload</a>
+          {% endif %}
+          <span class="nav-user">{{ session.get('name') }}</span>
+          <a class="btn btn-ghost btn-small" href="{{ url_for('logout') }}">Log out</a>
+        {% else %}
+          <a href="{{ url_for('login') }}" class="{{ 'active' if request.endpoint == 'login' }}">Log in</a>
+          <a class="btn btn-primary btn-small" href="{{ url_for('register') }}">Register</a>
+        {% endif %}
+      </nav>
+    </div>
+  </header>
+
+  <main class="shell">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flashes">
+          {% for category, message in messages %}
+            <div class="flash flash-{{ category }}">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="site-footer">
+    <div class="shell foot-inner">
+      <span>The Reading Room — a peer-checked paper archive</span>
+      <span>Registered contributors only · published papers open to all</span>
+    </div>
+  </footer>
+
+</body>
+</html>

@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Submit a paper — The Reading Room{% endblock %}
+
+{% block content %}
+<div class="auth-wrap" style="margin-top:44px;">
+  <div class="form-card">
+    <div class="eyebrow">New submission</div>
+    <h1>Submit a paper</h1>
+    <p class="sub">It'll sit in the review queue until an admin approves it. You can track its status from your dashboard.</p>
+
+    <form method="post" enctype="multipart/form-data">
+      <div class="field">
+        <label for="title">Title</label>
+        <input type="text" id="title" name="title" required autofocus>
+      </div>
+      <div class="field">
+        <label for="description">Abstract / description <span style="text-transform:none; font-weight:400;">(optional)</span></label>
+        <textarea id="description" name="description" placeholder="A few sentences on what this paper covers…"></textarea>
+      </div>
+      <div class="field">
+        <label for="file">File (PDF, DOC, or DOCX)</label>
+        <input type="file" id="file" name="file" accept=".pdf,.doc,.docx" required>
+      </div>
+      <button class="btn btn-primary" type="submit" style="width:100%; justify-content:center;">Submit for review</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

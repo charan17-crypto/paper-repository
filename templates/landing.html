@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}The Reading Room — A Peer-Checked Paper Archive{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <div class="eyebrow">est. for work worth verifying</div>
+  <h1>Every paper here was read twice before it was shelved.</h1>
+  <p class="lead">
+    Contributors submit their work, an editor checks it, and only then does it
+    join the open archive. Browsing is free for anyone — adding to the shelf
+    takes an account.
+  </p>
+  <div class="actions">
+    <a class="btn btn-primary" href="{{ url_for('papers') }}">Browse the archive</a>
+    {% if session.get('user_id') %}
+      {% if session.get('role') == 'admin' %}
+        <a class="btn btn-ghost" href="{{ url_for('admin_panel') }}">Review submissions</a>
+      {% else %}
+        <a class="btn btn-ghost" href="{{ url_for('upload') }}">Submit a paper</a>
+      {% endif %}
+    {% else %}
+      <a class="btn btn-ghost" href="{{ url_for('register') }}">Register to contribute</a>
+    {% endif %}
+  </div>
+
+  <div class="search-row">
+    <form action="{{ url_for('papers') }}" method="get">
+      <input type="text" name="q" placeholder="Search published papers by title…">
+      <button class="btn btn-gold" type="submit">Search</button>
+    </form>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-head">
+    <h2>Recently published</h2>
+    <a href="{{ url_for('papers') }}">View full archive →</a>
+  </div>
+
+  {% if papers %}
+    <div class="card-grid">
+      {% for p in papers %}
+        <article class="index-card">
+          <span class="card-date">{{ p.uploaded_at.strftime('%d %b %Y') }}</span>
+          <h3>{{ p.title }}</h3>
+          <div class="card-author">{{ p.author }}</div>
+          {% if p.description %}
+            <p class="card-desc">{{ p.description[:110] }}{% if p.description|length > 110 %}…{% endif %}</p>
+          {% endif %}
+          <div class="card-foot">
+            <span class="stamp stamp-approved">Published</span>
+           <a href="{{ url_for('view_paper', paper_id=p.id) }}">View →</a>
+          </div>
+        </article>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="empty-state">Nothing's been published yet. Once an editor approves a submission, it'll appear here.</div>
+  {% endif %}
+</section>
+{% endblock %}

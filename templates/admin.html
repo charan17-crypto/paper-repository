@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+{% block title %}Approvals — The Reading Room{% endblock %}
+
+{% block content %}
+
+<section class="section" style="padding-top:44px;">
+    <div class="section-head">
+        <h2>Review Queue</h2>
+        <span class="eyebrow">{{ pending|length }} waiting</span>
+    </div>
+
+    {% if pending %}
+    <div class="card-grid">
+
+        {% for p in pending %}
+        <article class="index-card">
+
+            <span class="card-date">
+                Submitted {{ p.uploaded_at.strftime('%d %b %Y') }}
+            </span>
+
+            <h3>{{ p.title }}</h3>
+
+            <div class="card-author">
+                {{ p.author }} · {{ p.email }}
+            </div>
+
+            {% if p.description %}
+            <p class="card-desc">
+                {{ p.description[:140] }}
+                {% if p.description|length > 140 %}...{% endif %}
+            </p>
+            {% endif %}
+
+            <div class="card-foot" style="gap:8px;">
+                <a href="{{ url_for('view_paper', paper_id=p.id) }}">
+                    View Details →
+                </a>
+            </div>
+
+            <div class="card-foot" style="gap:8px;">
+
+                <form method="POST"
+                      action="{{ url_for('approve_paper', paper_id=p.id) }}"
+                      style="flex:1;">
+
+                    <button class="btn btn-gold btn-small"
+                            type="submit"
+                            style="width:100%;">
+                        Approve
+                    </button>
+
+                </form>
+
+                <form method="POST"
+                      action="{{ url_for('reject_paper', paper_id=p.id) }}"
+                      style="flex:1;">
+
+                    <button class="btn btn-danger btn-small"
+                            type="submit"
+                            style="width:100%;">
+                        Reject
+                    </button>
+
+                </form>
+
+            </div>
+
+            <!-- DELETE BUTTON -->
+            <form method="POST"
+                  action="{{ url_for('delete_paper', paper_id=p.id) }}"
+                  onsubmit="return confirm('Delete this paper permanently?');"
+                  style="margin-top:10px;">
+
+                <button class="btn btn-danger btn-small"
+                        type="submit"
+                        style="width:100%;">
+
+                    🗑 Delete Paper
+
+                </button>
+
+            </form>
+
+        </article>
+
+        {% endfor %}
+
+    </div>
+
+    {% else %}
+
+    <div class="empty-state">
+        The queue is empty — nothing waiting on a decision right now.
+    </div>
+
+    {% endif %}
+</section>
+
+<section class="section">
+
+    <div class="section-head">
+        <h2>Recent Activity</h2>
+    </div>
+
+    <div class="table-wrap">
+
+        <table class="ledger">
+
+            <thead>
+
+                <tr>
+                    <th>Title</th>
+                    <th>Author</th>
+                    <th>Submitted</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+            {% for p in recent %}
+
+                <tr>
+
+                    <td>{{ p.title }}</td>
+
+                    <td>{{ p.author }}</td>
+
+                    <td>{{ p.uploaded_at.strftime('%d %b %Y') }}</td>
+
+                    <td>
+                        <span class="stamp stamp-{{ p.status }}">
+                            {{ p.status }}
+                        </span>
+                    </td>
+
+                    <td>
+
+                        <form method="POST"
+                              action="{{ url_for('delete_paper', paper_id=p.id) }}"
+                              onsubmit="return confirm('Delete this paper permanently?');">
+
+                            <button class="btn btn-danger btn-small"
+                                    type="submit">
+
+                                Delete
+
+                            </button>
+
+                        </form>
+
+                    </td>
+
+                </tr>
+
+            {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</section>
+
+{% endblock %}

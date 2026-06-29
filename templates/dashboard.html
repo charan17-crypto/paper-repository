@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — The Reading Room{% endblock %}
+
+{% block content %}
+<section class="section" style="padding-top:44px;">
+  <div class="section-head">
+    <h2>Your submissions</h2>
+    <a class="btn btn-primary btn-small" href="{{ url_for('upload') }}">+ Submit a paper</a>
+  </div>
+
+  {% set approved_count = papers|selectattr('status','equalto','approved')|list|length %}
+  {% set pending_count  = papers|selectattr('status','equalto','pending')|list|length %}
+  {% set rejected_count = papers|selectattr('status','equalto','rejected')|list|length %}
+
+  <div class="stat-row">
+    <div class="stat-box"><div class="num">{{ papers|length }}</div><div class="label">Total submitted</div></div>
+    <div class="stat-box"><div class="num">{{ approved_count }}</div><div class="label">Published</div></div>
+    <div class="stat-box"><div class="num">{{ pending_count }}</div><div class="label">Awaiting review</div></div>
+    <div class="stat-box"><div class="num">{{ rejected_count }}</div><div class="label">Rejected</div></div>
+  </div>
+
+  {% if papers %}
+    <div class="table-wrap">
+      <table class="ledger">
+        <thead>
+          <tr>
+            <th>Title</th>
+            <th>Submitted</th>
+            <th>Status</th>
+            <th>Reviewed</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in papers %}
+            <tr>
+              <td>{{ p.title }}</td>
+              <td>{{ p.uploaded_at.strftime('%d %b %Y') }}</td>
+              <td><span class="stamp stamp-{{ p.status }}">{{ p.status }}</span></td>
+              <td>{{ p.reviewed_at.strftime('%d %b %Y') if p.reviewed_at else '—' }}</td>
+              <td>
+  <a href="{{ url_for('view_paper', paper_id=p.id) }}">View →</a>
+
+  {% if p.status == 'approved' %}
+    | 
+    <a href="{{ url_for('chat_paper', paper_id=p.id) }}">
+      💬 Chat
+    </a>
+  {% endif %}
+</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="empty-state">
+      You haven't submitted anything yet. <a href="{{ url_for('upload') }}">Submit your first paper</a> and it'll show up here while it's reviewed.
+    </div>
+  {% endif %}
+</section>
+{% endblock %}

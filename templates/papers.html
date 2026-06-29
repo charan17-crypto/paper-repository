@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Archive — The Reading Room{% endblock %}
+
+{% block content %}
+<section class="section" style="padding-top:44px;">
+  <div class="section-head">
+    <h2>{{ 'Results for “%s”' % q if q else 'Published archive' }}</h2>
+    <form action="{{ url_for('papers') }}" method="get" style="display:flex; gap:8px;">
+      <input type="text" name="q" value="{{ q }}" placeholder="Search by title…" style="width:240px;">
+      <button class="btn btn-gold btn-small" type="submit">Search</button>
+      {% if q %}<a class="btn btn-ghost btn-small" href="{{ url_for('papers') }}">Clear</a>{% endif %}
+    </form>
+  </div>
+
+  {% if papers %}
+    <div class="card-grid">
+      {% for p in papers %}
+        <article class="index-card">
+          <span class="card-date">{{ p.uploaded_at.strftime('%d %b %Y') }}</span>
+          <h3>{{ p.title }}</h3>
+          <div class="card-author">{{ p.author }}</div>
+          {% if p.description %}
+            <p class="card-desc">{{ p.description[:140] }}{% if p.description|length > 140 %}…{% endif %}</p>
+          {% endif %}
+          <div class="card-foot">
+            <span class="stamp stamp-approved">Published</span>
+            <a href="{{ url_for('view_paper', paper_id=p.id) }}">View →</a>
+          </div>
+        </article>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="empty-state">
+      {% if q %}
+        No published papers match “{{ q }}”. <a href="{{ url_for('papers') }}">Clear the search</a> to see everything.
+      {% else %}
+        Nothing's published yet — check back soon.
+      {% endif %}
+    </div>
+  {% endif %}
+</section>
+{% endblock %}

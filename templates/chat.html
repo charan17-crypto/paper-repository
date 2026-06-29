@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chat with Paper</title>
+</head>
+<body>
+
+<h2>Chat with: {{ paper.title }}</h2>
+
+<form method="POST">
+    <input type="text" name="question" placeholder="Ask something..." required>
+    <button type="submit">Ask</button>
+</form>
+
+<hr>
+
+{% if answer %}
+    <h3>Answer:</h3>
+    <p>{{ answer }}</p>
+{% endif %}
+
+</body>
+</html>
